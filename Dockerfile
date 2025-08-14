@@ -1,14 +1,21 @@
 # Use the official Apache HTTP Server image (Debian-based)
-FROM httpd:2.4
+FROM httpd:2.4-alpine3.22
 
-# Copy your existing HTML file into the default web root
-COPY index.html /usr/local/apache2/htdocs/index.html
+# Switch Apache to listen on 8081 (single internal port)
+RUN sed -i 's/^Listen 80$/Listen 8081/' /usr/local/apache2/conf/httpd.conf \
+    && echo 'IncludeOptional conf/extra/httpd-vhosts.conf' >> /usr/local/apache2/conf/httpd.conf
 
-# Configure Apache to listen on 8081 and 8082
-RUN sed -i 's/Listen 80/Listen 8081\nListen 8082/' /usr/local/apache2/conf/httpd.conf && \
-    echo '<VirtualHost *:8081>\nDocumentRoot "/usr/local/apache2/htdocs"\n</VirtualHost>' >> /usr/local/apache2/conf/extra/httpd-vhosts.conf && \
-    echo '<VirtualHost *:8082>\nDocumentRoot "/usr/local/apache2/htdocs"\n</VirtualHost>' >> /usr/local/apache2/conf/extra/httpd-vhosts.conf && \
-    echo 'Include conf/extra/httpd-vhosts.conf' >> /usr/local/apache2/conf/httpd.conf
+# Optional: create a vhost pointing to the default docroot
+# (keeps things explicit; you can remove if you prefer the default)
+RUN printf '%s\n' \
+   '<VirtualHost *:8081>' \
+   '  DocumentRoot "/usr/local/apache2/htdocs"' \
+   '  <Directory "/usr/local/apache2/htdocs">' \
+   '    Options Indexes FollowSymLinks' \
+   '    AllowOverride All' \
+   '    Require all granted' \
+   '  </Directory>' \
+   '</VirtualHost>' \
+   > /usr/local/apache2/conf/extra/httpd-vhosts.conf
 
-# Expose both ports
-EXPOSE 8081 8082
+EXPOSE 8081
