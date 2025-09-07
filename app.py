@@ -45,7 +45,7 @@ def calculate():
             operation = request.form["operation"]
 
             if operation == "suma":
-                result = calculaladora.suma(a, b)
+                result = calculadora.suma(a, b)
             elif operation == "resta":
                 result = calculadora.resta(a, b)
             elif operation == "multiplicación":
