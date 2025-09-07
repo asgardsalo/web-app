@@ -1,80 +1,64 @@
-from flask import Flask, request, render_template, redirect, session
-import mysql.connector
+from flask import Flask, request, render_template_string
+import calculadora # import your functions
 
 app = Flask(__name__)
-app.secret_key = 'your-secure-key'
 
-# MySQL config
-db_config = {
-    'host': 'your-db-host',
-    'user': 'your-db-user',
-    'password': 'your-db-password',
-    'database': 'fees'
-}
+# Simple HTML form
+html_form = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculadora Web</title>
+</head>
+<body>
+    <h2>🔢 Calculadora Web</h2>
+    <form method="post" action="/">
+        <input type="number" name="a" step="any" placeholder="Primer número" required>
+        <input type="number" name="b" step="any" placeholder="Segundo número" required>
+        <select name="operation">
+            <option value="suma">Sumar (+)</option>
+            <option value="resta">Restar (-)</option>
+            <option value="multiplicación">Multiplicar (*)</option>
+            <option value="división">Dividir (/)</option>
+            <option value="potencia">Potencia (x^y)</option>
+        </select>
+        <button type="submit">Calcular</button>
+    </form>
+    {% if result is not none %}
+        <h3>✅ Resultado: {{ result }}</h3>
+    {% endif %}
+    {% if error %}
+        <h3 style="color:red;">❌ Error: {{ error }}</h3>
+    {% endif %}
+</body>
+</html>
+"""
 
-user_db_config = {
-    'host': 'your-db-host',
-    'user': 'your-db-user',
-    'password': 'your-db-password',
-    'database': 'users'
-}
+@app.route("/", methods=["GET", "POST"])
+def calculate():
+    result = None
+    error = None
+    if request.method == "POST":
+        try:
+            a = float(request.form["a"])
+            b = float(request.form["b"])
+            operation = request.form["operation"]
 
-@app.route('/')
-def login():
-    return render_template('login.html')
+            if operation == "suma":
+                result = calculaladora.suma(a, b)
+            elif operation == "resta":
+                result = calculadora.resta(a, b)
+            elif operation == "multiplicación":
+                result = calculadora.multiplicación(a, b)
+            elif operation == "división":
+                result = calculadora.división(a, b)
+            elif operation == "potencia":
+                result = calculadora.potencia(a, b)
 
-@app.route('/auth', methods=['POST'])
-def auth():
-    uname = request.form['username']
-    pwd = request.form['password']
-    conn = mysql.connector.connect(**user_db_config)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE username=%s AND password=%s", (uname, pwd))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if user:
-        session['user'] = uname
-        return redirect('/dashboard')
-    else:
-        return "Invalid credentials", 403
+        except Exception as e:
+            error = str(e)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    else:
-        name = request.form['name']
-        uname = request.form['username']
-        pwd = request.form['password']
-        conn = mysql.connector.connect(**user_db_config)
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (name, username, password) VALUES (%s, %s, %s)", (name, uname, pwd))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return redirect('/')
+    return render_template_string(html_form, result=result, error=error)
 
-@app.route('/dashboard')
-def dashboard():
-    if 'user' not in session:
-        return redirect('/')
-    return render_template('form.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    name = request.form['name']
-    surname = request.form['surname']
-    grade = request.form['grade']
-    fee = request.form['fee']
-    paid = 1 if request.form.get('paid') else 0
-    parent = request.form['parent']
-
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO fees (name, surname, grade, fee, paid, parent) VALUES (%s, %s, %s, %s, %s, %s)",
-                   (name, surname, grade, fee, paid, parent))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Saved!"
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8081)
