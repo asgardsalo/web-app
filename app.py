@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template_string
-import calculadora # import your functions
+import calculadora
 
 app = Flask(__name__)
 
