@@ -11,7 +11,6 @@ def call () {
             sh """
             docker run -d \
             -p 8081:8081 \
-            --name calc-app \
             calculator-web
         """
         }
