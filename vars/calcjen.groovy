@@ -3,7 +3,7 @@ def call () {
  stage('Stop Old Container') {
         steps {
             script {
-                sh "docker stop $(docker ps -q)"
+                sh "docker rm -f calc-app || true"
             }
         }
     }
