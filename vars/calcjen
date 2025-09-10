@@ -11,7 +11,12 @@ def call () {
     stage('Run New Container') {
         steps {
             script {
-                sh "docker run -d -p 8081:8081 --name calc-app calculator-web"
+                sh """
+                docker run -d \
+                -p 8081:8081 \
+                --name calc-app \
+                calculator-web
+            """
             }
         }
     }
