@@ -1,18 +1,23 @@
 def call () {
 
     stage('Stop Old Container') {
-        script {
-            sh "docker rm -f calc-app || true"
-       }
+        steps {
+            script {
+                sh 'docker rm -f calc-app || true'
+            }
+        }
     }
 
     stage('Run New Container') {
-        script {
-            sh """
-            docker run -d \
-            -p 8081:8081 \
-            calculator-web
-        """
+        steps {
+            script {
+                sh '''
+                    docker run -d \
+                    --name calc-app \
+                    -p 8081:8081 \
+                    calculator-web
+                '''
+            }
         }
     }
 
