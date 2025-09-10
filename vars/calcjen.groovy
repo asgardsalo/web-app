@@ -1,11 +1,9 @@
 def call () {
 
- stage('Stop Old Container') {
-        steps {
-            script {
-                sh "docker rm -f calc-app || true"
-            }
-        }
+    stage('Stop Old Container') {
+        script {
+            sh "docker rm -f calc-app || true"
+       }
     }
 
     stage('Run New Container') {
