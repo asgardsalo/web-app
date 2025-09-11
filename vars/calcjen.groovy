@@ -2,7 +2,7 @@ def call () {
 
     stage('Stop Old Container') {
         script {
-            sh '/usr/local/bin/docker rm -f calc-app || true'
+            sh '/usr/local/bin/docker ps -q | xargs -r /usr/local/bin/docker rm -f'
         }
     }
 
@@ -10,7 +10,6 @@ def call () {
         script {
             sh '''
                 /usr/local/bin/docker run -d \
-                --name calc-app \
                 -p 8081:8081 \
                 calculator-web
             '''
